@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Beautiful Memories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .fade-transition {
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        }
+        /* Animation for the new feedback cards appearing */
+        .feedback-card {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 via-white to-blue-50 min-h-screen font-sans text-slate-800">
+
+    <div id="splash-screen" class="fixed inset-0 bg-gradient-to-br from-pink-100 via-rose-50 to-purple-100 flex flex-col items-center justify-center p-6 sm:p-12 z-50 fade-transition">
+        <div class="max-w-2xl text-center">
+            <i data-lucide="heart" class="w-16 h-16 text-rose-400 mx-auto mb-8 animate-pulse" fill="currentColor"></i>
+            <h1 class="text-3xl sm:text-5xl font-serif leading-relaxed mb-6">
+                "Not every Bond needs years...<br/>Some are bulit in silent understanding and connection."
+            </h1>
+            <p class="text-rose-500 font-medium text-lg mb-12 flex items-center justify-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                Welcome to our memory box
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </p>
+            
+            <button onclick="enterWebsite()" class="bg-white/80 hover:bg-white text-rose-500 font-semibold py-4 px-10 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border border-rose-100 backdrop-blur-sm">
+                My Buddies 🌸
+            </button>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden py-12 px-4 sm:px-8 max-w-6xl mx-auto fade-transition opacity-0">
+        
+        <header class="text-center mb-16">
+            <h2 class="text-4xl sm:text-5xl font-bold mb-4 tracking-tight">
+                Angels in <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-500">Disguise</span>
+            </h2>
+            <p class="text-slate-500 text-lg">Tap on a card to reveal the message inside</p>
+        </header>
+
+        <div id="cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+            </div>
+
+        <div class="max-w-2xl mx-auto bg-white/60 backdrop-blur-md rounded-3xl p-8 border border-white shadow-sm mb-12">
+            <div class="text-center mb-8">
+                <i data-lucide="message-circle" class="w-10 h-10 text-rose-400 mx-auto mb-3"></i>
+                <h3 class="text-2xl font-bold text-slate-800">Share your thoughts here</h3>
+                <p class="text-slate-500">Add your own message to the wall</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="text" id="visitor-name" placeholder="Your Name" class="w-full px-5 py-3 rounded-2xl border border-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all bg-white/80" />
+                <textarea id="visitor-thought" rows="3" placeholder="Write something sweet..." class="w-full px-5 py-3 rounded-2xl border border-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all bg-white/80"></textarea>
+                <button onclick="submitThought()" class="w-full bg-rose-400 hover:bg-rose-500 text-white font-bold py-4 rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                    Post Message 💌
+                </button>
+            </div>
+        </div>
+
+        <h3 class="text-2xl font-bold text-slate-700 text-center mb-8">Friends' Wall</h3>
+        <div id="feedback-display" class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+            </div>
+
+    </div>
+
+    <div id="memory-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex-col items-center justify-center p-4 z-50" onclick="closeModal()">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative transform transition-all scale-95 opacity-0" id="modal-content" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 backdrop-blur-md transition-colors z-10">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="relative h-72 w-full bg-pink-100">
+                <img id="modal-img" src="" alt="Friend" class="w-full h-full object-cover"/>
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                    <h3 id="modal-name" class="text-3xl font-bold text-white drop-shadow-md">Name</h3>
+                </div>
+            </div>
+            <div class="p-8 text-center bg-gradient-to-b from-white to-pink-50/50">
+                <i data-lucide="heart" class="w-8 h-8 text-rose-400 mx-auto mb-4" fill="currentColor"></i>
+                <p id="modal-message" class="text-lg text-slate-600 leading-relaxed font-medium italic">"Message"</p>
+                <button onclick="closeModal()" class="mt-8 bg-rose-100 hover:bg-rose-200 text-rose-600 font-semibold py-3 px-8 rounded-full transition-colors w-full">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      // --- 📝 DATA SECTION: CUSTOMIZE THIS 📝 ---
+        const friends = [
+            { id: 1, name: "Fawaz", message: "The one who’s always been there for us, quietly guiding without making a show of it. Our special go-to person whenever we feel lost, stressed, or unsure. You’ve supported us in ways we don’t always say out loud, but truly feel. Really glad to get to know the real You. Thanks for all that you did and you are indeed SPECIAL to me. ☀️", image: "https://lh3.googleusercontent.com/u/0/d/YOUR_FILE_ID" },
+            { id: 2, name: "Keerthika", message: "Our strong, sassy girl with the softest and kindest heart. The one who never leaves anyone behind and always makes everyone feel seen and valued. Our creative soul, bringing life to everything she designs. Always standing up for us, ready to take on anyone who dares to trouble her people. Love you to the moon and back 🚀", image: "https://lh3.googleusercontent.com/u/0/d/1JAwV7xIi3DKHduhAo6cPL4OHu9IaJoio" },
+            { id: 3, name: "Sanjana", message: "Our little chelamma, someone we all truly love and cherish. The sweetest soul, always so calm, thoughtful, and understanding. You feel everything so deeply, and that’s what makes you so special. There’s a purity in your heart that’s rare and beautiful. Will forever cherish the moments we spent together. Love ya loads.🌙", image: "https://lh3.googleusercontent.com/u/0/d/YOUR_FILE_ID" },
+            { id: 4, name: "Imran", message: "To the thammudu who annoys me to no end, yet somehow always shows up when I need a laugh. Your terrible jokes still manage to lift my mood when I’m low. That mix of childishness and mood swings drives me crazy, but it’s also what makes you, You. Half the time I feel like hitting you with a bat, the other half I’m glad you’re around. I wouldn’t trade you for   anything.! 🌙", image: "https://lh3.googleusercontent.com/u/0/d/YOUR_FILE_ID" }
+        ];
+
+        // Link to your Gift PDF
+        const pdfGiftLink = "https://drive.google.com/file/d/1YUcLJB0L6TIcocM6799005TAb2tgFZuv/view?usp=drive_link";
+
+        // --- 🛠️ CODE LOGIC ---
+
+        function enterWebsite() {
+            const splash = document.getElementById('splash-screen');
+            const main = document.getElementById('main-content');
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                main.classList.remove('hidden');
+                setTimeout(() => { main.style.opacity = '1'; }, 50);
+            }, 1000);
+        }
+
+        function openModal(id) {
+            const friend = friends.find(f => f.id === id);
+            if (!friend) return;
+            document.getElementById('modal-img').src = friend.image;
+            document.getElementById('modal-name').innerText = friend.name;
+            document.getElementById('modal-message').innerText = `"${friend.message}"`;
+            const modal = document.getElementById('memory-modal');
+            const content = document.getElementById('modal-content');
+            modal.style.display = 'flex';
+            setTimeout(() => { content.style.opacity = '1'; content.style.transform = 'scale(1)'; }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('memory-modal');
+            const content = document.getElementById('modal-content');
+            content.style.opacity = '0';
+            content.style.transform = 'scale(0.95)';
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+        }
+
+        // Logic to add visitor thoughts to the page
+        function submitThought() {
+            const nameInput = document.getElementById('visitor-name');
+            const thoughtInput = document.getElementById('visitor-thought');
+            const displayArea = document.getElementById('feedback-display');
+
+            if (nameInput.value.trim() === "" || thoughtInput.value.trim() === "") {
+                alert("Please fill in both your name and your thought! ✨");
+                return;
+            }
+
+            // Create a new card for the feedback
+            const newCard = document.createElement('div');
+            newCard.className = "feedback-card bg-white p-6 rounded-2xl shadow-sm border border-rose-50 flex flex-col";
+            newCard.innerHTML = `
+                <i data-lucide="quote" class="w-6 h-6 text-rose-300 mb-2"></i>
+                <p class="text-slate-600 italic mb-4">"${thoughtInput.value}"</p>
+                <div class="mt-auto border-t border-rose-50 pt-4 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 font-bold text-xs uppercase">
+                        ${nameInput.value.charAt(0)}
+                    </div>
+                    <span class="font-bold text-slate-800 text-sm">${nameInput.value}</span>
+                </div>
+            `;
+
+            // Place it at the top of the feedback wall
+            displayArea.prepend(newCard);
+            
+            // Refresh icons so the quote icon shows up
+            lucide.createIcons();
+
+            // Clear the form
+            nameInput.value = "";
+            thoughtInput.value = "";
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cards-grid');
+            
+            // Render the memory cards
+            friends.forEach(friend => {
+                grid.innerHTML += `
+                    <div onclick="openModal(${friend.id})" class="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-pink-100/50 cursor-pointer transform transition-all duration-300 hover:-translate-y-2 group flex flex-col items-center justify-center min-h-[200px]">
+                        <div class="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="star" class="w-8 h-8 text-pink-400" fill="currentColor"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-700 group-hover:text-rose-500 transition-colors">${friend.name}</h3>
+                        <p class="text-slate-400 mt-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">Tap to view ❤️</p>
+                    </div>`;
+            });
+
+            // Add the special gift card
+            grid.innerHTML += `
+                <a href="${pdfGiftLink}" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-br from-purple-500 to-rose-400 rounded-3xl p-8 shadow-lg hover:shadow-2xl cursor-pointer transform transition-all duration-300 hover:-translate-y-2 group flex flex-col items-center justify-center min-h-[200px] text-white no-underline relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
+                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl transform -translate-x-5 translate-y-5"></div>
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm group-hover:rotate-12 transition-transform duration-300 z-10"><i data-lucide="gift" class="w-8 h-8 text-white"></i></div>
+                    <h3 class="text-2xl font-bold text-center mb-2 z-10">A Special Gift</h3>
+                    <p class="text-white/90 font-medium text-center bg-white/20 px-4 py-2 rounded-full text-sm mt-2 backdrop-blur-sm group-hover:bg-white/30 transition-colors z-10">Tap here to view 🎁</p>
+                </a>`;
+
+            lucide.createIcons();
+        }
+
+        window.onload = renderCards;
+    </script>
+</body>
+</html>
+
+
+
+
